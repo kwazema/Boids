@@ -8,7 +8,7 @@ public class Agent : MonoBehaviour
 
     public Vector3 separationForce, cohesionForce, alignmentForce;
     [SerializeField]
-    float radius = 1.0f;
+    public float radius = 1.0f;
 
     public List<Agent> neightbours;
 
@@ -27,7 +27,13 @@ public class Agent : MonoBehaviour
         Gizmos.color = Color.white;
         Gizmos.DrawWireSphere(transform.position, radius);
 
-      
+        if (UnityEditor.Selection.activeGameObject != null)
+        {
+            if (UnityEditor.Selection.activeGameObject != this)
+            {
+                //GetComponent<MeshRenderer>().material.color = Color.white; //TODO: Optimizar
+            }
+        }
     }
 
     private void Awake()
@@ -41,6 +47,7 @@ public class Agent : MonoBehaviour
         COHESION,
         ALIGNMENT
     }
+
     public void addForce(Vector3 f, DEBUGforceType type)
     {
         if (type == DEBUGforceType.SEPARATION)
@@ -52,23 +59,27 @@ public class Agent : MonoBehaviour
 
         velocity += f;
     }
+
     public void addForce(Vector3 f)
     {
         velocity += f;
     }
+
     public void updateAgent()
     {
         transform.position += velocity * Time.deltaTime;
     }
+
     public void checkNeightbours()
     {
         Collider[] checks = Physics.OverlapSphere(transform.position, radius);
+
         foreach (Collider c in checks)
         {
             neightbours.Add(c.GetComponent<Agent>());
         }
-       
     }
+
     // Start is called before the first frame update
     void Start()
     {

@@ -27,9 +27,13 @@ public class Boids : MonoBehaviour
         {
             Vector3 position = Vector3.up * Random.Range(0, 10)
                 + Vector3.right * Random.Range(0, 10) + Vector3.forward * Random.Range(0, 10);
-            agentlist.Add(Instantiate(agentPrefab, position, Quaternion.identity).GetComponent<Agent>());
 
+            Agent a = Instantiate(agentPrefab, position, Quaternion.identity).GetComponent<Agent>();
+            a.radius = agentRadius;
+
+            agentlist.Add(a);
         }
+
         agents = agentlist.ToArray();
     }
 
@@ -39,19 +43,18 @@ public class Boids : MonoBehaviour
         foreach (Agent a in agents)
         {
             a.velocity = Vector3.zero;
+            a.neightbours.Clear();
             checkForNeightBours(a);
             calculateSeparation(a);
             calculateAlignment(a);
             calculateCohesion(a);
             a.updateAgent();
-            a.neightbours.Clear();
-         
         }
     }
 
     void checkForNeightBours(Agent a)
     {
-        
+        a.checkNeightbours();
     }
 
     void calculateSeparation(Agent a)
@@ -70,4 +73,38 @@ public class Boids : MonoBehaviour
     {
         a.addForce(Vector3.right, Agent.DEBUGforceType.ALIGNMENT);
     }
+
+    private void OnDrawGizmos()
+    {
+        foreach (Agent a in agents)
+        {
+            if (a.TryGetComponent(out MeshRenderer ar))
+            {
+                if (ar.material.color != Color.white)
+                {
+                    ar.material.color = Color.white;
+                }
+            }
+        }
+
+        if (UnityEditor.Selection.activeGameObject != null)
+        {
+            if (UnityEditor.Selection.activeGameObject.TryGetComponent(out MeshRenderer r))
+            {
+                if (r.TryGetComponent(out Agent a))
+                {
+                    foreach (Agent n in a.neightbours)
+                    {
+                        if (n.TryGetComponent(out MeshRenderer rn))
+                        {
+                            rn.material.color = Color.magenta;
+                        }
+                    }
+                }
+
+                r.material.color = Color.red;
+            }
+        }
+    }
+
 }
